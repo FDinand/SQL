@@ -1,0 +1,206 @@
+-- 建立資料庫(使用CMD)
+--sqlite3 mydatabase.db
+
+-- 開啟資料庫
+-->mydatabase.db
+
+-- 建立表格一
+-- CREATE TABLE Students(
+-- id    INTEGER  PRIMARY   KEY AUTOINCREMENT,
+-- name  TEXT	  NOT NULL,
+-- age   INTEGER  NOT NULL,
+-- grade TEXT     NOT NULL
+-- );
+
+-- 插入資料
+-- INSERT INTO Students(name, age, grade) VALUES
+-- ('Alice' , 20, 'B'),
+-- ('Ben'   , 35, 'C'),
+-- ('Claire', 30, 'D'),
+-- ('Fred'  , 26, 'A'),
+-- ('Jack'  , 29, 'B'),
+-- ('Jasic' , 27, 'C'),
+-- ('Jimmy' , 28, 'E');
+
+-- 顯示表格
+-- SELECT * FROM Students;
+-- SELECT id, name FROM students;
+-- SELECT * FROM Students LIMIT 2;
+-- SELECT * FROM Students WHERE age >= 28;
+
+-- 建立臨時表格
+-- CREATE TEMPORARY TABLE Temp_students AS
+-- SELECT *
+-- FROM Students
+-- WHERE age >= 28;
+
+-- WHERE搭配AND、IN、OR、LIKE、BETWEEN、IS NULL、IS NOT NULL
+-- SELECT * FROM Students WHERE age > 30;
+--
+-- 顯示特定資料 IN 
+-- SELECT * FROM Students WHERE age IN (26,28);
+--
+-- 只要符合其中一種條件 OR
+-- SELECT * FROM Students WHERE name = 'Fred' or age >30;
+-- SELECT * FROM Students WHERE grade='A' OR grade='B';
+--
+-- 找尋TEXT的資料 like
+-- SELECT * FROM Students WHERE name like 'f%';
+-- 找尋區間 BETWEEN AND
+-- SELECT * FROM Students WHERE age BETWEEN 26 AND 28;
+--
+-- 空值
+-- SELECT * FROM Students WHERE grade IS NULL;
+-- SELECT * FROM Students WHERE grade IS NOT NULL;
+
+-- 排序 ORDER BY
+-- SELECT * FROM Students ORDER BY age;
+-- SELECT * FROM Students ORDER BY grade ASC;
+-- SELECT * FROM Students ORDER BY grade DESC;
+-- SELECT * FROM Students ORDER BY grade ASC, age DESC; --先排grade後排age
+-- SELECT * FROM Students ORDER BY 1; --數字表示第幾個column 
+
+-- 算數運算子 '+', '-', '*', '/'
+-- SELECT age,
+-- age*2 AS double_age
+-- FROM Students;
+
+-- 聚合函數 (Aggregate function) COUNT(), SUM(), AVG(), MIN(), MAX(), DISTINCT()
+-- SELECT COUNT(age), SUM(age), ROUND(AVG(age)), MIN(age), MAX(age), COUNT(DISTINCT(grade))
+-- FROM Students;
+--
+-- 聚合函數 + WHERE
+-- SELECT sum(age) FROM Students WHERE grade='C';
+
+-- 分組 GROUP BY
+-- SELECT AVG(age),grade FROM Students GROUP BY grade;
+--
+-- 分組下的敘述統計
+-- SELECT grade,
+--   COUNT(*) AS student_count,
+--   AVG(age) AS average_age,
+--   MAX(age) AS max_age,
+--   MIN(age) AS min_age,
+--   SUM(age) AS total_age
+-- FROM Students
+-- GROUP BY grade;
+--
+-- 分組並運用HAVING、WHERE，WHERE優先於HAVING
+-- SELECT SUM(age)
+-- FROM Students
+-- WHERE age >= 27
+-- GROUP BY grade
+-- HAVING count(*) = 1;
+
+-- 子查詢(Subquery)
+--
+-- 建立表格二
+-- CREATE TABLE Purchase_order(
+-- item     TEXT PRIMARY KEY,
+-- quantity INT  NOT NULL,
+-- buyer    TEXT NOT NULL);
+-- INSERT INTO Purchase_order(item, quantity, buyer) VALUES
+-- ('pen'	, 10, 'Alice'),
+-- ('eraser'	, 5 , 'Fred'),
+-- ('ballpoint_pen', 23, 'Claire'),
+-- ('correction tap', 8, 'Jack');
+--
+-- 在 SELECT 中使用 subquery
+-- SELECT 
+-- 	buyer, 
+-- 	quantity,
+-- 	(SELECT grade FROM Students WHERE name = buyer) as grade
+-- FROM Purchase_order ;
+--
+-- 在 FROM 中使用 subquery ，表格變形（變短或長）或預先篩選表格
+-- SELECT grade, grade_count
+-- FROM (SELECT grade, COUNT(*) AS grade_count FROM Students GROUP BY grade);
+--
+-- 相同結果
+-- SELECT grade, count(*) as grade_count
+-- FROM Students
+-- GROUP BY grade;
+--
+-- 在 WHERE 中使用 subquery
+-- SELECT buyer, quantity 
+-- FROM Purchase_order 
+-- WHERE buyer IN (SELECT name 
+-- 	FROM Students);
+
+-- CROSS JOIN  通常用於產生組合
+-- SELECT * FROM Students CROSS JOIN Purchase_order;
+
+-- INNER JOIN
+--
+-- 建立表格三
+-- CREATE TABLE Sale_order(
+-- number INTEGER PRIMARY KEY,
+-- demand INTEGER NOT NULL,
+-- name   TEXT    NOT NULL);
+--
+-- INSERT INTO Sale_order(number, demand, name) VALUES
+-- (10001, 10, 'Alice'),
+-- (10011, 50, 'Jack'),
+-- (10021, 33, 'Fred'),
+-- (10031, 28, 'Ben'),
+-- (10041,  6, 'Claire');
+--
+-- INNER JOIN 連接多個表格
+-- SELECT Students.name, Purchase_order.item, Sale_order.number
+-- FROM Students
+-- INNER JOIN Purchase_order ON Students.name = Purchase_order.buyer
+-- INNER JOIN Sale_order     ON Students.name = Sale_order.name;
+--
+-- 使用別名
+-- SELECT st.name, po.item, sa.number
+-- FROM Students as st
+-- INNER JOIN Purchase_order as po ON st.name = po.buyer
+-- INNER JOIN Sale_order  as sa    ON st.name = sa.name;
+
+-- SELF JOIN
+-- 建立表格四
+-- CREATE TABLE Employees(
+-- id         INTEGER PRIMARY KEY AUTOINCREMENT,
+-- name       TEXT    NOT NULL,
+-- manager_id INTEGER NULL);
+--
+-- INSERT INTO Employees(name, manager_id) VALUES
+-- ('Alice' ,NULL),
+-- ('Bob'   , 1),
+-- ('Cliare', 1),
+-- ('David' , 2),
+-- ('Edward', 2);
+--
+-- Self JOIN 與 LEFT JOIN一起使用
+-- SELECT e1.name as Employee, e2.name as Manager
+-- FROM Employees e1
+-- LEFT JOIN Employees e2 ON  e2.id=e1.manager_id ;
+
+-- Cartesian Cross Join可用於產生組合
+-- SELECT * 
+-- FROM Students CROSS JOIN Purchase_order;
+
+
+-- Union 垂直連結表格
+-- 
+-- 利用現有表格建立新表格
+-- CREATE TABLE New_students 
+-- as SELECT *
+-- FROM Students
+-- where Students.id is NULL;
+--
+-- 插入資料
+-- INSERT INTO New_students(id, name, age, grade) VALUES
+-- (0,'Ferdinand' , 18, 'A'),
+-- (0,'Cystal'   , 13, 'C'),
+-- (4,'Fred'  , 26, 'A');
+--
+-- union 將表格連接、排序，不會重複顯示相同的資料
+-- SELECT * FROM Students
+-- UNION
+-- SELECT * FROM New_students;
+--
+-- union all 直接將兩個表個連接
+-- SELECT * FROM Students
+-- UNION ALL
+-- SELECT * FROM New_students;
